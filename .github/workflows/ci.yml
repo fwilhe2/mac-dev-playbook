@@ -1,12 +1,7 @@
----
 name: CI
-'on':
-  pull_request:
+on:
   push:
-    branches:
-      - master
-  schedule:
-    - cron: "0 5 * * 4"
+  workflow_dispatch:
 
 jobs:
 
@@ -23,12 +18,17 @@ jobs:
           python-version: '3.x'
 
       - name: Install test dependencies.
-        run: pip3 install yamllint ansible ansible-lint
+        run: pip3 install ansible ansible-lint
 
       - name: Lint code.
-        run: |
-          yamllint .
-          ansible-lint
+        run: ansible-lint -p main.yml tasks
+
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: npx prettier --write "./**/*.yml"
+      - run: git diff --name-only --exit-code
 
   integration:
     name: Integration
